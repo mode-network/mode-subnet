@@ -1,12 +1,10 @@
 import unittest
 from unittest.mock import Mock
-from datetime import datetime
 
 import numpy as np
 from numpy.testing import assert_almost_equal, assert_equal
 
 from simulation.validator.forward import remove_zero_rewards
-from simulation.validator.miner_data_handler import MinerDataHandler
 from simulation.simulation_input import SimulationInput
 from simulation.validator.price_data_provider import PriceDataProvider
 from simulation.validator.reward import get_rewards, compute_softmax
@@ -16,12 +14,7 @@ from tests.utils import generate_values
 class TestRewards(unittest.TestCase):
     def setUp(self):
         """Set up a temporary file for testing."""
-        self.test_file = "test_miner_data.json"
-        self.handler = MinerDataHandler(self.test_file)
         self.price_data_provider = PriceDataProvider("BTC")
-
-    def tearDown(self):
-        pass
 
     def test_compute_softmax_1(self):
         score_values = np.array([1000, 1500, 2000])
@@ -49,30 +42,6 @@ class TestRewards(unittest.TestCase):
         self.assertEqual(len(filtered_miner_uids), 2)
         self.assertEqual(1, filtered_miner_uids[0])
         self.assertEqual(3, filtered_miner_uids[1])
-
-    def test_get_rewards(self):
-        miner_id = 0
-        start_time = "2024-11-26T00:00:00"
-        current_time = "2024-11-28T00:00:00"
-
-        values = generate_values(datetime.fromisoformat(start_time))
-        self.handler.set_values(miner_id, start_time, values)
-
-        softmax_scores = get_rewards(
-            self.handler,
-            self.price_data_provider,
-            SimulationInput(
-                asset="BTC",
-                start_time=current_time,
-                time_increment=60,  # default: 5 mins
-                time_length=3600,  # default: 1 day
-                num_simulations=1  # default: 100
-            ),
-            [miner_id],  # TODO: add another test with more miners
-            current_time
-        )
-        print(softmax_scores)
-        # TODO: assert the scores
 
     def test_get_rewards_scores(self):
         mock_miner_data_handler = Mock()
