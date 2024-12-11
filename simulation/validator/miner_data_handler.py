@@ -1,4 +1,3 @@
-import json
 from datetime import datetime, timedelta
 import bittensor as bt
 from sqlalchemy import select
