@@ -1,4 +1,3 @@
-import json
 from datetime import datetime, timedelta
 import bittensor as bt
 from sqlalchemy import select
@@ -57,40 +56,24 @@ class MinerDataHandler:
                 connection.rollback()
                 bt.logging.info(f"in set_reward_details (got an exception): {e}")
 
-    @staticmethod
-    def get_values(miner_uid: int, current_time_str: str):
-        """Retrieve the record with the longest valid interval for the given miner_id."""
-        current_time = datetime.fromisoformat(current_time_str)
+@staticmethod
+def get_values(miner_uid: int, current_time_str: str):
+    """Retrieve the record with the longest valid interval for the given miner_id."""
+    current_time = datetime.fromisoformat(current_time_str)
+    max_end_time = current_time - timedelta(days=5)
 
-        best_record = None
-        max_end_time = current_time - timedelta(days=5)
+    with engine.connect() as connection:
+        query = select(miner_predictions.c.prediction).where(
+            miner_predictions.c.validation_time >= max_end_time,
+            miner_predictions.c.validation_time <= current_time,
+            miner_predictions.c.miner_uid == miner_uid,
+        ).order_by(desc(func.cast(func.jsonb_array_elements(miner_predictions.c.prediction)[-1].op('->>')('time'), DateTime))).limit(1)
+        
+        result = connection.execute(query).fetchone()
 
-        with engine.connect() as connection:
-            query = select(miner_predictions.c.prediction).where(
-                miner_predictions.c.validation_time >= max_end_time,
-                miner_predictions.c.validation_time <= current_time,
-                miner_predictions.c.miner_uid == miner_uid
-            )
-            result = connection.execute(query)
+    bt.logging.info("in get_values, predictions fetched for miner_uid: " + str(miner_uid))
 
-            # Fetch all results
-            predictions = [row.prediction for row in result]
+    if result is None:
+        return []
 
-        bt.logging.info("in get_values, predictions length:" + str(len(predictions)))
-
-        # Find the record with the longest valid interval
-        for prediction in predictions:
-            if prediction is None:
-                continue
-
-            end_time = datetime.fromisoformat(prediction[-1]["time"])
-
-            if current_time > end_time:
-                if end_time > max_end_time:
-                    max_end_time = end_time
-                    best_record = prediction
-
-        if not best_record:
-            return []
-
-        return best_record
+    return result.prediction

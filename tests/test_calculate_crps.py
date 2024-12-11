@@ -18,14 +18,14 @@ class TestCalculateCrps(unittest.TestCase):
         predictions_path = [90000, 91000, 92000]
         real_price_path = [92600, 92500, 93500]
 
-        score = calculate_crps_for_miner(
+        sum_all_scores, detailed_crps_data = calculate_crps_for_miner(
             miner_uid,
             np.array([predictions_path]),
             np.array(real_price_path),
             time_increment
         )
 
-        self.assertEqual(score, 1100)
+        self.assertEqual(sum_all_scores, 1100)
 
     def test_calculate_crps_for_miner_2(self):
         miner_uid = 1
@@ -33,14 +33,14 @@ class TestCalculateCrps(unittest.TestCase):
         predictions_path = [90000, 91000, 92000, 92500, 92600]
         real_price_path = [92600, 92500, 92600, 92500, 93500]
 
-        score = calculate_crps_for_miner(
+        sum_all_scores, detailed_crps_data = calculate_crps_for_miner(
             miner_uid,
             np.array([predictions_path]),
             np.array(real_price_path),
             time_increment
         )
 
-        self.assertEqual(score, 3500)
+        self.assertEqual(sum_all_scores, 3500)
 
     def test_calculate_crps_for_miner_3(self):
         miner_uid = 1
@@ -48,11 +48,11 @@ class TestCalculateCrps(unittest.TestCase):
         predictions_path = [50000, 51000, 52000]
         real_price_path = [92600, 92500, 93500]
 
-        score = calculate_crps_for_miner(
+        sum_all_scores, detailed_crps_data = calculate_crps_for_miner(
             miner_uid,
             np.array([predictions_path]),
             np.array(real_price_path),
             time_increment
         )
 
-        self.assertEqual(score, 1100)
+        self.assertEqual(sum_all_scores, 1100)

@@ -9,13 +9,7 @@ from tests.utils import generate_values
 class TestMinerDataHandler(unittest.TestCase):
     def setUp(self):
         """Set up a temporary file for testing."""
-        self.test_file = "test_miner_data.json"
-        self.handler = MinerDataHandler(self.test_file)
-
-    def tearDown(self):
-        """Clean up the temporary file after each test."""
-        if os.path.exists(self.test_file):
-            os.remove(self.test_file)
+        self.handler = MinerDataHandler()
 
     def test_get_values_within_range(self):
         """
